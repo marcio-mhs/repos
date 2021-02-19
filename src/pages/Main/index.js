@@ -1,4 +1,4 @@
-import React, {useState, useCallback} from 'react';
+import React, {useState, useCallback, useEffect} from 'react';
 import {FaGithub, FaPlus, FaSpinner, FaBars, FaTrash} from 'react-icons/fa';
 import { Container, Form, SubmitButton, List, DeleteButton } from './styles';
 import api from '../../services/api';
@@ -8,9 +8,22 @@ export default function Main(){
     const [newRepo, setNewRepo] = useState('');
     const [repositorios, setRepositorios] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [alert, setAlert] = useState(null);
+
+    useEffect(()=>{
+        const repoStorage = localStorage.getItem('repos');
+        if(repoStorage){
+            setRepositorios(JSON.parse(repoStorage));
+        }
+    }, []);
+
+    useEffect(() => {
+        localStorage.setItem('repos', JSON.stringify(repositorios));
+    }, [repositorios]);
 
     function handleInputChange(e){
         setNewRepo(e.target.value);
+        setAlert(null);
     }
 
     const handleSubmit = useCallback((e) => {
@@ -20,23 +33,31 @@ export default function Main(){
         async function submit(){
             
             setLoading(true);
+            setAlert(null);
             
             try {
+
+                if (newRepo == ''){
+                    throw new Error('Você precisa indicar um repositório!');
+                }
+
                 const response = await api.get(`repos/${newRepo}`);
+
+                const hasRepo = repositorios.find(repo => repo.name == newRepo);
+                if (hasRepo){
+                    throw new Error('Repositório duplicado!');
+                }
 
                 const data = {
                     name: response.data.full_name,
                 }
 
-                console.log(data);
-
                 setRepositorios([...repositorios, data]);
-
-                console.log(repositorios);
 
                 setNewRepo('');
 
             } catch(error){
+                setAlert(true);
                 console.log(error);
             } finally {
                 setLoading(false);
@@ -62,7 +83,7 @@ export default function Main(){
                 Meus repositórios
             </h1>
 
-            <Form onSubmit={handleSubmit}>
+            <Form onSubmit={handleSubmit} error={alert}>
                 <input 
                     type="text" 
                     placeholder="Adicionar Repositórios"
