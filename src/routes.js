@@ -6,10 +6,10 @@ import Repositorio from './pages/Repositorio';
 export default function Routes(){
     return(
         <BrowserRouter>
-            <switch>
+            <Switch>
                 <Route exact path="/" component={Main} />
                 <Route exact path="/repositorio/:repositorio" component={Repositorio} />
-            </switch>
+            </Switch>
         </BrowserRouter>
     );
 }
