@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import api from '../../services/api';
-import { Container, Owner, Loading, BackButton } from './styles';
+import { Container, Owner, Loading, BackButton, IssuesList } from './styles';
 import {FaArrowLeft} from 'react-icons/fa';
 
 export default function Repositorio({match}){
@@ -26,6 +26,7 @@ export default function Repositorio({match}){
             
             setRepositorio(repositorioData.data);
             setIsseus(issuesData.data);
+            console.log(issuesData.data);
             setLoading(false);
         }
 
@@ -46,12 +47,29 @@ export default function Repositorio({match}){
                 <FaArrowLeft color="#000" size={35}/>
             </BackButton>
             <Owner>
-            <img 
+                <img 
                     src={repositorio.owner.avatar_url} 
                     alt={repositorio.owner.login} />
                 <h1>{repositorio.name}</h1>
                 <p>{repositorio.description}</p>
             </Owner>
+
+            <IssuesList>
+                {issues.map(issue => (
+                    <li key={String(issue.id)}>
+                        <img src={issue.user.avatar_url} alt={issue.user.login} />
+                        <div>
+                            <strong>
+                                <a href={issue.html_url}>{issue.title}</a>
+                                {issue.labels.map(label => (
+                                    <span key={String(label.id)}>{label.name}</span>
+                                ))}
+                            </strong>
+                            <p>{issue.user.login}</p>
+                        </div>
+                    </li>
+                ))}
+            </IssuesList>
         </Container>
     );
           
